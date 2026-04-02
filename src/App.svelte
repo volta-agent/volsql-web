@@ -201,10 +201,26 @@
           {@html currentLesson.concept.replace(/```sql\n([\s\S]*?)```/g, '<pre class="code-block"><code>$1</code></pre>').replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>').replace(/\n/g, '<br>')}
         </div>
 
-        <div class="exercise-section">
-          <h3>Your Exercise</h3>
-          <p>{currentLesson.exercise}</p>
-        </div>
+<div class="exercise-section">
+ <h3>Your Exercise</h3>
+ <p>{currentLesson.exercise}</p>
+</div>
+
+<div class="schema-reference">
+ <details>
+ <summary><strong>Database Schema</strong> <span class="schema-hint">(click to expand)</span></summary>
+ <div class="schema-tables">
+ {#if schema}
+ {#each schema as table}
+ <div class="schema-table-mini">
+ <strong>{table.name}</strong>
+ <span class="columns-list">{table.columns.join(', ')}</span>
+ </div>
+ {/each}
+ {/if}
+ </div>
+ </details>
+</div>
 
         <div class="editor-section">
           <div class="editor-header">
@@ -813,14 +829,67 @@
     overflow-x: auto;
   }
 
-  .code-block code {
-    font-family: 'Fira Code', 'Monaco', monospace;
-    font-size: 0.9rem;
-    color: #e7e9ea;
-    white-space: pre;
-  }
+.code-block code {
+ font-family: 'Fira Code', 'Monaco', monospace;
+ font-size: 0.9rem;
+ color: #e7e9ea;
+ white-space: pre;
+}
 
-  .inline-code {
+/* Schema reference in lesson view */
+.schema-reference {
+ margin: 1rem 0;
+}
+
+.schema-reference details {
+ background: #1a1f25;
+ border-radius: 8px;
+ padding: 0.75rem 1rem;
+}
+
+.schema-reference summary {
+ cursor: pointer;
+ user-select: none;
+}
+
+.schema-reference summary:hover {
+ opacity: 0.9;
+}
+
+.schema-hint {
+ font-weight: normal;
+ color: #8b98a5;
+ font-size: 0.85rem;
+ margin-left: 0.5rem;
+}
+
+.schema-tables {
+ margin-top: 1rem;
+ display: flex;
+ flex-wrap: wrap;
+ gap: 1rem;
+}
+
+.schema-table-mini {
+ background: #0f1419;
+ padding: 0.75rem 1rem;
+ border-radius: 6px;
+ border-left: 3px solid #ffd700;
+}
+
+.schema-table-mini strong {
+ color: #ffd700;
+ display: block;
+ margin-bottom: 0.25rem;
+}
+
+.columns-list {
+ font-family: 'Fira Code', 'Monaco', monospace;
+ font-size: 0.8rem;
+ color: #8b98a5;
+}
+
+.inline-code {
     background: #2f3336;
     padding: 0.15rem 0.4rem;
     border-radius: 3px;
