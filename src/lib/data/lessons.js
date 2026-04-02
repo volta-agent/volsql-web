@@ -2,20 +2,74 @@
 // Each lesson teaches through a real work scenario
 
 const lessons = [
-  // ========== MODULE 1: GETTING DATA OUT ==========
-  {
-    id: 'm1-l1',
-    module: 1,
-    moduleTitle: 'Getting Data Out',
-    lesson: 1,
-    title: 'Your First Request',
-    subtitle: 'When your boss needs a list, fast',
-    scenario: `Your manager just Slacked you: "Can you pull a list of all our customers? Marketing needs it by EOD."
+ // ========== MODULE 1: GETTING DATA OUT ==========
+ {
+ id: 'm1-l1',
+ module: 1,
+ moduleTitle: 'Getting Data Out',
+ lesson: 1,
+ title: 'What\'s In This Database?',
+ subtitle: 'Before you query, you need to know what exists',
+ scenario: `It's your first day. Someone hands you a database connection and says "pull the customer list."
 
-You've never written SQL before. The database looks intimidating. But you need to deliver.
+But you've never seen this database before. You don't know what tables exist or what columns they have.
 
-This lesson teaches you the most useful SQL skill: getting data out.`,
-    concept: `# The SELECT Statement
+First rule of SQL: **explore before you query**.`,
+ concept: `# Discovering Your Database
+
+Every database has a schema - a map of what's inside. You need to find it.
+
+**In SQLite (what we're using), try this:**
+
+\`\`\`sql
+SELECT name FROM sqlite_master WHERE type='table';
+\`\`\`
+
+This shows all table names. You'll see: customers, products, orders, order_items, events
+
+**To see columns in a table:**
+
+\`\`\`sql
+PRAGMA table_info(customers);
+\`\`\`
+
+This reveals: id, name, email, country, city, total_spent, created_at
+
+**In other databases:**
+- PostgreSQL: \`SELECT * FROM information_schema.columns WHERE table_name = 'customers';\`
+- MySQL: \`DESCRIBE customers;\`
+- SQL Server: \`sp_help customers;\`
+
+The syntax varies, but the goal is the same: know your data before you query it.`,
+ exercise: `Explore the database. Run a query to list all table names.
+
+Hint: Use sqlite_master with type='table'`,
+ hint: 'SELECT name FROM sqlite_master WHERE type=\'table\';',
+ solution: "SELECT name FROM sqlite_master WHERE type='table';",
+ validation: {
+ mustContain: ['SELECT', 'sqlite_master', 'table'],
+ minRows: 1
+ },
+ proTip: 'Most SQL tools have a schema browser in the UI. But knowing the query lets you script it - useful for documentation or audits.',
+ commonErrors: [
+ { error: 'Forgot the WHERE clause', fix: 'Without WHERE type=\'table\', you\'ll get indexes and triggers too' },
+ { error: 'Wrong column name', fix: 'sqlite_master has: name, type, tbl_name, sql - use name for table names' }
+ ]
+ },
+
+ {
+ id: 'm1-l2',
+ module: 1,
+ moduleTitle: 'Getting Data Out',
+ lesson: 2,
+ title: 'Your First Data Pull',
+ subtitle: 'When your boss needs a list, fast',
+ scenario: `Your manager just Slacked you: "Can you pull a list of all our customers? Marketing needs it by EOD."
+
+Now that you know the database has a \`customers\` table with columns: id, name, email, country, city, total_spent, created_at
+
+You're ready to get data.`,
+ concept: `# The SELECT Statement
 
 SQL is how you ask a database for information. The basic pattern is:
 
@@ -37,49 +91,49 @@ SELECT * FROM customers;
 \`\`\`sql
 SELECT name, email FROM customers;
 \`\`\``,
-    exercise: `The marketing team needs customer names and emails for a campaign.
+ exercise: `The marketing team needs customer names and emails for a campaign.
 
 Write a query to get the \`name\` and \`email\` columns from the \`customers\` table.`,
-    hint: 'Start with SELECT, then the column names separated by commas, then FROM, then the table name.',
-    solution: 'SELECT name, email FROM customers;',
-    validation: {
-      mustContain: ['SELECT', 'name', 'email', 'FROM', 'customers'],
-      minRows: 1
-    },
-    proTip: 'When sharing query results, export as CSV (most SQL tools have this). Non-technical colleagues can open it in Excel.',
-    commonErrors: [
-      { error: 'Missing comma between columns', fix: 'SELECT name email FROM customers → SELECT name, email FROM customers' },
-      { error: 'Wrong table name', fix: 'Check spelling - table names are case-sensitive in some databases' }
-    ]
-  },
+ hint: 'Start with SELECT, then the column names separated by commas, then FROM, then the table name.',
+ solution: 'SELECT name, email FROM customers;',
+ validation: {
+ mustContain: ['SELECT', 'name', 'email', 'FROM', 'customers'],
+ minRows: 1
+ },
+ proTip: 'When sharing query results, export as CSV (most SQL tools have this). Non-technical colleagues can open it in Excel.',
+ commonErrors: [
+ { error: 'Missing comma between columns', fix: 'SELECT name email FROM customers → SELECT name, email FROM customers' },
+ { error: 'Wrong table name', fix: 'Check spelling - table names are case-sensitive in some databases' }
+ ]
+ },
 
-  {
-    id: 'm1-l2',
-    module: 1,
-    moduleTitle: 'Getting Data Out',
-    lesson: 2,
-    title: 'Finding Specific Records',
-    subtitle: 'When you need one customer, not all of them',
-    scenario: `Support needs all orders for a specific customer: sarah.johnson@email.com
+ {
+ id: 'm1-l3',
+ module: 1,
+ moduleTitle: 'Getting Data Out',
+ lesson: 3,
+ title: 'Finding Specific Records',
+ subtitle: 'When you need one customer, not all of them',
+ scenario: `Support needs all orders for a specific customer.
 
-You don't want to scroll through 50,000 orders. You need to filter.`,
-    concept: `# The WHERE Clause
+You don't want to scroll through all orders. You need to filter.`,
+ concept: `# The WHERE Clause
 
 To filter results, add WHERE:
 
 \`\`\`sql
 SELECT * FROM orders
-WHERE customer_email = 'sarah.johnson@email.com';
+WHERE customer_id = 1;
 \`\`\`
 
 **How to think about it:**
 - \`SELECT *\` = "show me everything"
 - \`FROM orders\` = "from the orders table"
 - \`WHERE\` = "but only if..."
-- \`customer_email = '...'\` = "the email matches this value"
+- \`customer_id = 1\` = "the customer_id matches this value"
 
 **Text vs Numbers:**
-- Text needs quotes: \`name = 'Sarah'\`
+- Text needs quotes: \`status = 'shipped'\`
 - Numbers don't: \`order_id = 1234\`
 
 **Multiple conditions:**
@@ -88,31 +142,31 @@ SELECT * FROM orders
 WHERE status = 'pending'
 AND total > 100;
 \`\`\``,
-    exercise: `Find all orders where the status is 'shipped' and the total is greater than 50.`,
-    hint: 'Use WHERE with two conditions connected by AND. Remember: text needs quotes, numbers don\'t.',
-    solution: "SELECT * FROM orders WHERE status = 'shipped' AND total > 50;",
-    validation: {
-      mustContain: ['SELECT', 'FROM', 'orders', 'WHERE', 'status', 'shipped', 'AND', 'total', '>', '50'],
-      minRows: 1
-    },
-    proTip: 'When filtering by text, use LIKE for partial matches: WHERE email LIKE \'%@gmail.com\' finds all Gmail users.',
-    commonErrors: [
-      { error: 'Forgot quotes around text', fix: "WHERE status = shipped → WHERE status = 'shipped'" },
-      { error: 'Used = instead of >', fix: 'WHERE total = 100 finds exactly 100, WHERE total > 100 finds greater than' }
-    ]
-  },
+ exercise: `Find all orders where the status is 'shipped' and the total is greater than 50.`,
+ hint: 'Use WHERE with two conditions connected by AND. Remember: text needs quotes, numbers don\'t.',
+ solution: "SELECT * FROM orders WHERE status = 'shipped' AND total > 50;",
+ validation: {
+ mustContain: ['SELECT', 'FROM', 'orders', 'WHERE', 'status', 'shipped', 'AND', 'total', '>', '50'],
+ minRows: 1
+ },
+ proTip: 'When filtering by text, use LIKE for partial matches: WHERE email LIKE \'%@gmail.com\' finds all Gmail users.',
+ commonErrors: [
+ { error: 'Forgot quotes around text', fix: "WHERE status = shipped → WHERE status = 'shipped'" },
+ { error: 'Used = instead of >', fix: 'WHERE total = 100 finds exactly 100, WHERE total > 100 finds greater than' }
+ ]
+ },
 
-  {
-    id: 'm1-l3',
-    module: 1,
-    moduleTitle: 'Getting Data Out',
-    lesson: 3,
-    title: 'Sorting and Limiting',
-    subtitle: 'Finding the biggest spenders',
-    scenario: `Marketing wants to send a special offer to your top 10 customers by total spend.
+ {
+ id: 'm1-l4',
+ module: 1,
+ moduleTitle: 'Getting Data Out',
+ lesson: 4,
+ title: 'Sorting and Limiting',
+ subtitle: 'Finding the biggest spenders',
+ scenario: `Marketing wants to send a special offer to your top 10 customers by total spend.
 
 You need to sort by revenue and show only the top results.`,
-    concept: `# ORDER BY and LIMIT
+ concept: `# ORDER BY and LIMIT
 
 Sort results with ORDER BY:
 \`\`\`sql
@@ -137,680 +191,543 @@ LIMIT 10;
 **Pro tip:** You can sort by multiple columns:
 \`\`\`sql
 SELECT * FROM orders
-ORDER BY status ASC, created_at DESC;
+ORDER BY status ASC, order_date DESC;
 \`\`\`
 This sorts by status first, then by date within each status.`,
-    exercise: `Get the top 5 orders by total amount, showing the order_id, customer_email, and total columns.`,
-    hint: 'ORDER BY the total column in DESC order, then LIMIT to 5 results.',
-    solution: 'SELECT order_id, customer_email, total FROM orders ORDER BY total DESC LIMIT 5;',
-    validation: {
-      mustContain: ['SELECT', 'order_id', 'customer_email', 'total', 'FROM', 'orders', 'ORDER BY', 'DESC', 'LIMIT', '5'],
-      minRows: 1,
-      maxRows: 5
-    },
-    proTip: 'For "most recent" records, ORDER BY created_at DESC LIMIT 10 is your friend.',
-    commonErrors: [
-      { error: 'Forgot DESC', fix: 'ORDER BY total → shows smallest first. Add DESC for largest first.' },
-      { error: 'Wrong LIMIT position', fix: 'LIMIT comes after ORDER BY, not before' }
-    ]
-  },
+ exercise: `Get the top 5 orders by total amount, showing the id, customer_id, and total columns.`,
+ hint: 'ORDER BY the total column in DESC order, then LIMIT to 5 results.',
+ solution: 'SELECT id, customer_id, total FROM orders ORDER BY total DESC LIMIT 5;',
+ validation: {
+ mustContain: ['SELECT', 'FROM', 'orders', 'ORDER BY', 'DESC', 'LIMIT', '5'],
+ minRows: 1,
+ maxRows: 5
+ },
+ proTip: 'For "most recent" records, ORDER BY order_date DESC LIMIT 10 is your friend.',
+ commonErrors: [
+ { error: 'Forgot DESC', fix: 'ORDER BY total → shows smallest first. Add DESC for largest first.' },
+ { error: 'Wrong LIMIT position', fix: 'LIMIT comes after ORDER BY, not before' }
+ ]
+ },
 
-  {
-    id: 'm1-l4',
-    module: 1,
-    moduleTitle: 'Getting Data Out',
-    lesson: 4,
-    title: 'Date Filtering',
-    subtitle: 'Last month\'s sales report',
-    scenario: `Finance needs last month's revenue. You have an orders table with an order_date column.
+ {
+ id: 'm1-l5',
+ module: 1,
+ moduleTitle: 'Getting Data Out',
+ lesson: 5,
+ title: 'Date Filtering',
+ subtitle: 'Last month\'s sales report',
+ scenario: `Finance needs last month's revenue. You have an orders table with an order_date column.
 
 Dates in SQL can be tricky. Let's make them easy.`,
-    concept: `# Working with Dates
+ concept: `# Working with Dates
 
 Date formats vary by database, but these patterns work everywhere:
 
-**Last 30 days:**
 \`\`\`sql
+-- Orders from a specific date
 SELECT * FROM orders
-WHERE order_date >= date('now', '-30 days');
-\`\`\`
+WHERE order_date = '2024-01-15';
 
-**Specific date range:**
-\`\`\`sql
+-- Orders after a date
+SELECT * FROM orders
+WHERE order_date >= '2024-01-01';
+
+-- Orders in a date range
 SELECT * FROM orders
 WHERE order_date BETWEEN '2024-01-01' AND '2024-01-31';
 \`\`\`
 
-**Date format:** Always use YYYY-MM-DD (ISO 8601). It works in every database.
-
 **Common date functions:**
-- \`date('now')\` = today
-- \`date('now', '-7 days')\` = a week ago
-- \`date('now', 'start of month')\` = first day of this month
 
-**Pro tip:** To compare just the date part (ignoring time), use date():
+SQLite: \`date('now')\`, \`date('now', '-7 days')\`
+PostgreSQL: \`CURRENT_DATE\`, \`NOW() - INTERVAL '7 days'\`
+MySQL: \`CURDATE()\`, \`DATE_SUB(NOW(), INTERVAL 7 DAY)\`
+
+**Pro tip:** Always store dates as DATE or DATETIME columns, not text. It enables proper filtering and sorting.`,
+ exercise: `Find all orders placed in January 2024 (between '2024-01-01' and '2024-01-31').`,
+ hint: 'Use BETWEEN for date ranges. Dates need quotes and use YYYY-MM-DD format.',
+ solution: "SELECT * FROM orders WHERE order_date BETWEEN '2024-01-01' AND '2024-01-31';",
+ validation: {
+ mustContain: ['SELECT', 'FROM', 'orders', 'order_date', 'BETWEEN', '2024-01'],
+ minRows: 1
+ },
+ proTip: 'The ISO format YYYY-MM-DD works in every database. Avoid MM/DD/YYYY or DD/MM/YYYY - they cause confusion.',
+ commonErrors: [
+ { error: 'Wrong date format', fix: "Use '2024-01-15' not '01/15/2024' or '15-01-2024'" },
+ { error: 'Forgot quotes', fix: "Dates need quotes: WHERE order_date = '2024-01-15'" }
+ ]
+ },
+
+ // ========== MODULE 2: AGGREGATION ==========
+ {
+ id: 'm2-l1',
+ module: 2,
+ moduleTitle: 'Summarizing Data',
+ lesson: 1,
+ title: 'Counting and Summing',
+ subtitle: 'How many orders? How much revenue?',
+ scenario: `Your boss asks: "How many orders did we get last month? What's the total revenue?"
+
+You don't want to count rows manually. Let SQL do the math.`,
+ concept: `# Aggregate Functions
+
+SQL can summarize data with aggregate functions:
+
 \`\`\`sql
-WHERE date(order_date) = '2024-01-15'
-\`\`\``,
-    exercise: `Get all orders from January 2024. Use the BETWEEN operator with the order_date column.`,
-    hint: 'Use WHERE order_date BETWEEN \'2024-01-01\' AND \'2024-01-31\'. Date format is YYYY-MM-DD.',
-    solution: "SELECT * FROM orders WHERE order_date BETWEEN '2024-01-01' AND '2024-01-31';",
-    validation: {
-      mustContain: ['SELECT', 'FROM', 'orders', 'WHERE', 'order_date', 'BETWEEN', '2024-01'],
-      minRows: 1
-    },
-    proTip: 'When someone says "last month", clarify: calendar month or rolling 30 days? The queries are different.',
-    commonErrors: [
-      { error: 'Wrong date format', fix: "Use '2024-01-15' not '01/15/2024' or '15-01-2024'" },
-      { error: 'BETWEEN includes both endpoints', fix: 'BETWEEN \'2024-01-01\' AND \'2024-01-31\' includes Jan 31' }
-    ]
-  },
+-- Count rows
+SELECT COUNT(*) FROM orders;
 
-  // ========== MODULE 2: COMBINING DATA ==========
-  {
-    id: 'm2-l1',
-    module: 2,
-    moduleTitle: 'Combining Data',
-    lesson: 1,
-    title: 'Your First JOIN',
-    subtitle: 'When one table isn\'t enough',
-    scenario: `You need a report showing customer names next to their order totals.
+-- Sum values
+SELECT SUM(total) FROM orders;
 
-Customer names are in the customers table. Orders are in the orders table. How do you combine them?`,
-    concept: `# JOIN: Connecting Tables
+-- Average
+SELECT AVG(total) FROM orders;
 
-Tables are often related:
-- \`customers\` table has customer info (id, name, email)
-- \`orders\` table has order info (id, customer_id, total)
-
-The \`customer_id\` in orders links to \`id\` in customers.
-
-**JOIN syntax:**
-\`\`\`sql
-SELECT customers.name, orders.total
-FROM orders
-JOIN customers ON orders.customer_id = customers.id;
+-- Min and Max
+SELECT MIN(total), MAX(total) FROM orders;
 \`\`\`
 
-**How to read it:**
-- \`FROM orders\` = start with orders
-- \`JOIN customers\` = connect to customers table
-- \`ON orders.customer_id = customers.id\` = match where they link
-
-**Pro tip:** Use table aliases for cleaner queries:
+**Combine with filtering:**
 \`\`\`sql
-SELECT c.name, o.total
-FROM orders o
-JOIN customers c ON o.customer_id = c.id;
-\`\`\``,
-    exercise: `Show customer names and their order totals by joining customers and orders tables. The orders table has a customer_id that links to customers.id.`,
-    hint: 'SELECT c.name, o.total FROM orders o JOIN customers c ON o.customer_id = c.id',
-    solution: 'SELECT c.name, o.total FROM orders o JOIN customers c ON o.customer_id = c.id;',
-    validation: {
-      mustContain: ['SELECT', 'JOIN', 'ON', 'customer_id'],
-      minRows: 1
-    },
-    proTip: 'When someone asks for "data from multiple tables", they usually need a JOIN.',
-    commonErrors: [
-      { error: 'Forgot the ON clause', fix: 'JOIN customers ON orders.customer_id = customers.id (not just JOIN customers)' },
-      { error: 'Ambiguous column', fix: 'When both tables have "id", specify: customers.id or orders.id' }
-    ]
-  },
-
-  {
-    id: 'm2-l2',
-    module: 2,
-    moduleTitle: 'Combining Data',
-    lesson: 2,
-    title: 'When Records Might Be Missing',
-    subtitle: 'LEFT JOIN for the real world',
-    scenario: `Marketing wants a list of ALL customers and their order counts - including customers who haven't ordered yet.
-
-Regular JOIN drops customers with no orders. You need LEFT JOIN.`,
-    concept: `# LEFT JOIN: Keep All Rows from First Table
-
-**JOIN types:**
-- \`JOIN\` (INNER) = only rows that match in both tables
-- \`LEFT JOIN\` = all rows from left table, matching from right (NULL if no match)
-
-\`\`\`sql
-SELECT c.name, COUNT(o.id) as order_count
-FROM customers c
-LEFT JOIN orders o ON c.id = o.customer_id
-GROUP BY c.id;
+SELECT COUNT(*) FROM orders
+WHERE status = 'shipped';
 \`\`\`
 
-**When to use LEFT JOIN:**
-- "Show all X and their Y" (some X might not have Y)
-- Finding missing data: customers with no orders
-- Checking data quality: are there orphaned records?
+This counts only shipped orders.
 
-**Visual example:**
-\`\`\`
-customers          orders
-id | name          customer_id | total
-1  | Sarah         1           | 50
-2  | Mike          1           | 30
-3  | Emma          NULL        | NULL (no orders)
-\`\`\`
-
-LEFT JOIN keeps Emma with NULL values for order columns.`,
-    exercise: `List all customers and their order totals. Include customers who haven't ordered (their total should be NULL or 0).`,
-    hint: 'Use LEFT JOIN instead of JOIN. Start with FROM customers c LEFT JOIN orders o ON...',
-    solution: 'SELECT c.name, o.total FROM customers c LEFT JOIN orders o ON c.id = o.customer_id;',
-    validation: {
-      mustContain: ['SELECT', 'LEFT JOIN', 'ON', 'customer_id'],
-      minRows: 1
-    },
-    proTip: 'When you see "show all X, including those without Y", think LEFT JOIN.',
-    commonErrors: [
-      { error: 'Used JOIN instead of LEFT JOIN', fix: 'JOIN drops non-matching rows. LEFT JOIN keeps them.' },
-      { error: 'Wrong table order', fix: 'LEFT JOIN customers → orders shows all customers. Swap order to show all orders.' }
-    ]
-  },
-
-  // ========== MODULE 3: AGGREGATING DATA ==========
-  {
-    id: 'm3-l1',
-    module: 3,
-    moduleTitle: 'Aggregating Data',
-    lesson: 1,
-    title: 'Summarizing with Aggregates',
-    subtitle: 'Revenue reports and metrics',
-    scenario: `Your CEO asks: "What's our total revenue this quarter?"
-
-You have 50,000 order rows. You don't want to sum them manually. Enter aggregate functions.`,
-    concept: `# Aggregate Functions
-
-Aggregate functions summarize data:
-
-| Function | Purpose | Example |
-|----------|---------|---------|
-| \`COUNT()\` | Count rows | \`COUNT(*)\` = total rows |
-| \`SUM()\` | Add values | \`SUM(total)\` = revenue |
-| \`AVG()\` | Average | \`AVG(order_value)\` |
-| \`MIN()\` | Smallest | \`MIN(created_at)\` = first order |
-| \`MAX()\` | Largest | \`MAX(total)\` = biggest order |
-
+**Multiple aggregates at once:**
 \`\`\`sql
-SELECT SUM(total) as total_revenue
-FROM orders
-WHERE order_date >= '2024-01-01';
-\`\`\`
-
-**Pro tip:** Always name your aggregates with AS:
-\`\`\`sql
-SELECT COUNT(*) as customer_count,
-       SUM(total) as total_revenue,
-       AVG(total) as average_order
+SELECT
+ COUNT(*) as total_orders,
+ SUM(total) as revenue,
+ AVG(total) as average_order
 FROM orders;
 \`\`\`
 
-Without aliases, columns show as "COUNT(*)" which is confusing in reports.`,
-    exercise: `Calculate: 1) Total number of orders, 2) Sum of all order totals, 3) Average order value. Name them order_count, total_revenue, and avg_order.`,
-    hint: 'SELECT COUNT(*) as order_count, SUM(total) as total_revenue, AVG(total) as avg_order FROM orders',
-    solution: 'SELECT COUNT(*) as order_count, SUM(total) as total_revenue, AVG(total) as avg_order FROM orders;',
-    validation: {
-      mustContain: ['SELECT', 'COUNT', 'SUM', 'AVG', 'as'],
-      minRows: 1,
-      maxRows: 1
-    },
-    proTip: 'COUNT(*) counts all rows. COUNT(column) counts non-NULL values. They differ when you have NULLs.',
-    commonErrors: [
-      { error: 'Forgot AS alias', fix: 'SELECT SUM(total) → SELECT SUM(total) as total_revenue' },
-      { error: 'Aggregate in WHERE', fix: "You can't use SUM in WHERE. Use HAVING after GROUP BY instead." }
-    ]
-  },
+The \`as\` keyword names your results.`,
+ exercise: `Calculate the total revenue (sum of total) and average order value from the orders table.`,
+ hint: 'Use SUM(total) and AVG(total). Give them meaningful names with AS.',
+ solution: 'SELECT SUM(total) as total_revenue, AVG(total) as average_order_value FROM orders;',
+ validation: {
+ mustContain: ['SELECT', 'SUM', 'AVG', 'FROM', 'orders'],
+ minRows: 1
+ },
+ proTip: 'COUNT(column) counts non-null values. COUNT(*) counts all rows including nulls.',
+ commonErrors: [
+ { error: 'Forgot FROM', fix: 'SELECT COUNT(*) orders → SELECT COUNT(*) FROM orders' },
+ { error: 'Mixed aggregates wrong', fix: 'SELECT COUNT(SUM(total)) → invalid. Use one aggregate at a time.' }
+ ]
+ },
 
-  {
-    id: 'm3-l2',
-    module: 3,
-    moduleTitle: 'Aggregating Data',
-    lesson: 2,
-    title: 'Grouping for Insights',
-    subtitle: 'Revenue by category, orders by status',
-    scenario: `Marketing wants revenue by product category, not just total revenue.
+ {
+ id: 'm2-l2',
+ module: 2,
+ moduleTitle: 'Summarizing Data',
+ lesson: 2,
+ title: 'Grouping Data',
+ subtitle: 'Revenue by country, orders by status',
+ scenario: `Marketing wants to know: which countries are our top markets?
 
-You need to group similar rows together and calculate for each group.`,
-    concept: `# GROUP BY: Aggregate by Category
+You need to group orders by country and sum the revenue for each.`,
+ concept: `# GROUP BY
 
-GROUP BY splits data into groups, then calculates aggregates for each:
-
-\`\`\`sql
-SELECT category, SUM(total) as revenue
-FROM orders
-GROUP BY category;
-\`\`\`
-
-**How it works:**
-1. Group rows by category
-2. Calculate SUM for each group
-3. Return one row per category
-
-**Common patterns:**
-
-Revenue by month:
-\`\`\`sql
-SELECT strftime('%Y-%m', order_date) as month,
-       SUM(total) as revenue
-FROM orders
-GROUP BY month
-ORDER BY month;
-\`\`\`
-
-Orders by status:
-\`\`\`sql
-SELECT status, COUNT(*) as count
-FROM orders
-GROUP BY status;
-\`\`\`
-
-**Rule:** Every column in SELECT must be either:
-- In GROUP BY, or
-- An aggregate function (SUM, COUNT, etc.)`,
-    exercise: `Show the number of orders and total revenue for each order status. Group by the status column.`,
-    hint: 'SELECT status, COUNT(*) as order_count, SUM(total) as revenue FROM orders GROUP BY status',
-    solution: 'SELECT status, COUNT(*) as order_count, SUM(total) as revenue FROM orders GROUP BY status;',
-    validation: {
-      mustContain: ['SELECT', 'status', 'COUNT', 'SUM', 'GROUP BY', 'status'],
-      minRows: 1
-    },
-    proTip: 'When someone says "break down by X" or "by each X", they want GROUP BY.',
-    commonErrors: [
-      { error: 'Column not in GROUP BY', fix: 'SELECT category, name, SUM(x) GROUP BY category → Error! Add name to GROUP BY or remove from SELECT' },
-      { error: 'Used WHERE with aggregate', fix: 'Use HAVING to filter after grouping: HAVING SUM(total) > 1000' }
-    ]
-  },
-
-  {
-    id: 'm3-l3',
-    module: 3,
-    moduleTitle: 'Aggregating Data',
-    lesson: 3,
-    title: 'Filtering Groups',
-    subtitle: 'Find categories with high revenue',
-    scenario: `You want to find product categories with more than $10,000 in revenue.
-
-WHERE doesn't work here because you need to filter by the aggregate (SUM), not individual rows.`,
-    concept: `# HAVING: Filter After Grouping
-
-WHERE filters rows before grouping.
-HAVING filters groups after grouping.
+GROUP BY splits data into buckets and calculates aggregates for each:
 
 \`\`\`sql
-SELECT category, SUM(total) as revenue
+SELECT shipping_country, SUM(total) as revenue
 FROM orders
-GROUP BY category
-HAVING SUM(total) > 10000;
+GROUP BY shipping_country;
 \`\`\`
 
-**Order of operations:**
+This returns one row per country with its total revenue.
+
+**How to think about it:**
+1. GROUP BY creates buckets (one per country)
+2. Each bucket gets aggregated (SUM, COUNT, etc.)
+3. You get one result row per bucket
+
+**Multiple groups:**
+\`\`\`sql
+SELECT shipping_country, status, COUNT(*) as count
+FROM orders
+GROUP BY shipping_country, status;
+\`\`\`
+
+This shows order counts by country AND status.`,
+ exercise: `Show the number of orders by shipping_country. Include the country and count columns.`,
+ hint: 'Use GROUP BY shipping_country with COUNT(*).',
+ solution: 'SELECT shipping_country, COUNT(*) as order_count FROM orders GROUP BY shipping_country;',
+ validation: {
+ mustContain: ['SELECT', 'shipping_country', 'COUNT', 'FROM', 'orders', 'GROUP BY'],
+ minRows: 1
+ },
+ proTip: 'Every column in SELECT must either be in GROUP BY or be an aggregate function.',
+ commonErrors: [
+ { error: 'Selected non-grouped column', fix: 'SELECT name, COUNT(*) GROUP BY status → name is not grouped' },
+ { error: 'Forgot GROUP BY', fix: 'Without GROUP BY, aggregates collapse to one row' }
+ ]
+ },
+
+ {
+ id: 'm2-l3',
+ module: 2,
+ moduleTitle: 'Summarizing Data',
+ lesson: 3,
+ title: 'Filtering Groups',
+ subtitle: 'Top performing countries only',
+ scenario: `Your report shows 50 countries, but most have tiny revenue. Boss wants to focus on markets with $500+ in sales.
+
+You need to filter after grouping.`,
+ concept: `# HAVING
+
+WHERE filters rows before grouping. HAVING filters groups after grouping.
+
+\`\`\`sql
+-- Wrong: Can't use WHERE with aggregates
+SELECT shipping_country, SUM(total)
+FROM orders
+WHERE SUM(total) > 500  -- ERROR!
+GROUP BY shipping_country;
+
+-- Right: Use HAVING for group filters
+SELECT shipping_country, SUM(total) as revenue
+FROM orders
+GROUP BY shipping_country
+HAVING SUM(total) > 500;
+\`\`\`
+
+**The order matters:**
 1. FROM (get data)
 2. WHERE (filter rows)
 3. GROUP BY (create groups)
 4. HAVING (filter groups)
 5. SELECT (choose columns)
-6. ORDER BY (sort)
+6. ORDER BY (sort results)
+
+**Combine WHERE and HAVING:**
+\`\`\`sql
+SELECT shipping_country, SUM(total) as revenue
+FROM orders
+WHERE status = 'shipped'  -- Only shipped orders
+GROUP BY shipping_country
+HAVING SUM(total) > 500;  -- Countries with $500+ shipped
+\`\`\``,
+ exercise: `Show shipping countries with total revenue over 500. Include country and revenue columns.`,
+ hint: 'Use GROUP BY shipping_country, then HAVING SUM(total) > 500.',
+ solution: 'SELECT shipping_country, SUM(total) as revenue FROM orders GROUP BY shipping_country HAVING SUM(total) > 500;',
+ validation: {
+ mustContain: ['SELECT', 'shipping_country', 'SUM', 'GROUP BY', 'HAVING'],
+ minRows: 1
+ },
+ proTip: 'HAVING is like WHERE but for grouped results. Think: HAVING filters the output of GROUP BY.',
+ commonErrors: [
+ { error: 'Used WHERE instead of HAVING', fix: 'WHERE SUM(total) > 500 → HAVING SUM(total) > 500' },
+ { error: 'Forgot GROUP BY', fix: 'HAVING only works after GROUP BY' }
+ ]
+ },
+
+ // ========== MODULE 3: JOINS ==========
+ {
+ id: 'm3-l1',
+ module: 3,
+ moduleTitle: 'Combining Tables',
+ lesson: 1,
+ title: 'Why Joins Matter',
+ subtitle: 'Your data lives in multiple tables',
+ scenario: `You need a report showing order IDs with customer names.
+
+But orders only have customer_id, not customer names. The names are in the customers table.
+
+You need to join.`,
+ concept: `# Understanding Joins
+
+Real databases split data across tables:
+- \`orders\` has: id, customer_id, total, status
+- \`customers\` has: id, name, email
+
+To get order details with customer names, you join:
+
+\`\`\`sql
+SELECT orders.id, customers.name, orders.total
+FROM orders
+JOIN customers ON orders.customer_id = customers.id;
+\`\`\`
+
+**How to read this:**
+1. FROM orders (start with orders table)
+2. JOIN customers (bring in customers table)
+3. ON orders.customer_id = customers.id (match where they connect)
+4. SELECT columns from both tables
+
+**The connection:**
+- \`orders.customer_id\` references \`customers.id\`
+- This is a foreign key relationship
+- JOIN finds matching rows in both tables`,
+ exercise: `Show all orders with customer names. Include order id, customer name, and order total.`,
+ hint: 'JOIN customers ON orders.customer_id = customers.id',
+ solution: 'SELECT orders.id, customers.name, orders.total FROM orders JOIN customers ON orders.customer_id = customers.id;',
+ validation: {
+ mustContain: ['SELECT', 'FROM', 'orders', 'JOIN', 'customers', 'ON'],
+ minRows: 1
+ },
+ proTip: 'Table aliases save typing: FROM orders o JOIN customers c ON o.customer_id = c.id',
+ commonErrors: [
+ { error: 'Ambiguous column', fix: 'SELECT id FROM orders JOIN customers → Which id? Use orders.id or customers.id' },
+ { error: 'Wrong join condition', fix: 'ON orders.id = customers.id → Should be customer_id matches id' }
+ ]
+ },
+
+ {
+ id: 'm3-l2',
+ module: 3,
+ moduleTitle: 'Combining Tables',
+ lesson: 2,
+ title: 'Left Joins',
+ subtitle: 'Include unmatched rows',
+ scenario: `You want a report of all customers and their order counts.
+
+But some customers haven't ordered yet. A regular JOIN would exclude them.
+
+You need LEFT JOIN.`,
+ concept: `# LEFT JOIN vs JOIN
+
+**JOIN (INNER JOIN):** Only rows that match in both tables.
+
+\`\`\`sql
+SELECT c.name, o.id
+FROM customers c
+JOIN orders o ON c.id = o.customer_id;
+\`\`\`
+Only shows customers who have placed orders.
+
+**LEFT JOIN:** All rows from left table, matching rows from right (or NULL if no match).
+
+\`\`\`sql
+SELECT c.name, o.id as order_id
+FROM customers c
+LEFT JOIN orders o ON c.id = o.customer_id;
+\`\`\`
+Shows ALL customers, with order_id NULL if they haven't ordered.
 
 **When to use each:**
-- \`WHERE total > 100\` = filter individual orders over $100
-- \`HAVING SUM(total) > 10000\` = filter categories with total over $10,000
+- JOIN: "Show me orders with customer info" (must have an order)
+- LEFT JOIN: "Show me all customers and their orders" (include customers with zero orders)`,
+ exercise: `List all customers and their order counts. Include customers with zero orders.`,
+ hint: 'Use LEFT JOIN and COUNT. Group by customer.',
+ solution: 'SELECT c.name, COUNT(o.id) as order_count FROM customers c LEFT JOIN orders o ON c.id = o.customer_id GROUP BY c.id, c.name;',
+ validation: {
+ mustContain: ['SELECT', 'FROM', 'customers', 'LEFT JOIN', 'orders', 'GROUP BY'],
+ minRows: 1
+ },
+ proTip: 'COUNT(o.id) counts non-null values. COUNT(*) would count 1 even for customers with no orders.',
+ commonErrors: [
+ { error: 'Used JOIN instead of LEFT JOIN', fix: 'Missing customers who haven\'t ordered' },
+ { error: 'Wrong COUNT', fix: 'COUNT(*) counts the group, use COUNT(o.id) to count actual orders' }
+ ]
+ },
 
-**Pro tip:** You can combine both:
-\`\`\`sql
-SELECT category, SUM(total) as revenue
-FROM orders
-WHERE status = 'completed'  -- only completed orders
-GROUP BY category
-HAVING SUM(total) > 10000;  -- categories with $10k+ revenue
-\`\`\``,
-    exercise: `Find customers who have placed more than 5 orders. Show their customer_id and order count.`,
-    hint: 'SELECT customer_id, COUNT(*) as order_count FROM orders GROUP BY customer_id HAVING COUNT(*) > 5',
-    solution: 'SELECT customer_id, COUNT(*) as order_count FROM orders GROUP BY customer_id HAVING COUNT(*) > 5;',
-    validation: {
-      mustContain: ['SELECT', 'customer_id', 'COUNT', 'GROUP BY', 'customer_id', 'HAVING', 'COUNT', '> 5'],
-      minRows: 1
-    },
-    proTip: '"Customers who bought X times" or "products with more than Y sales" = GROUP BY + HAVING',
-    commonErrors: [
-      { error: 'Used WHERE instead of HAVING', fix: 'WHERE COUNT(*) > 5 → Error! Use HAVING COUNT(*) > 5' },
-      { error: 'Used alias in HAVING', fix: 'Some databases require HAVING COUNT(*) > 5, not HAVING order_count > 5' }
-    ]
-  },
+ // ========== MODULE 4: ANALYTICS ==========
+ {
+ id: 'm4-l1',
+ module: 4,
+ moduleTitle: 'Real-World Analytics',
+ lesson: 1,
+ title: 'Daily Active Users',
+ subtitle: 'How many users visit each day?',
+ scenario: `Product wants to track daily active users (DAU).
 
-  // ========== MODULE 4: ADVANCED PATTERNS ==========
-  {
-    id: 'm4-l1',
-    module: 4,
-    moduleTitle: 'Advanced Patterns',
-    lesson: 1,
-    title: 'Subqueries',
-    subtitle: 'Queries within queries',
-    scenario: `Find customers who spent more than the average customer.
+The events table logs every user action with user_id and created_at.
 
-First you need the average. Then you need to compare each customer to it. One query inside another.`,
-    concept: `# Subqueries: Queries Inside Queries
+You need to count unique users per day.`,
+ concept: `# DISTINCT and Date Functions
 
-A subquery is a query inside another query:
+**COUNT DISTINCT:** Count unique values.
 
 \`\`\`sql
-SELECT name, total_spent
-FROM customers
-WHERE total_spent > (
-    SELECT AVG(total_spent) FROM customers
-);
+SELECT COUNT(DISTINCT user_id)
+FROM events;
 \`\`\`
 
-**How it works:**
-1. Inner query runs first: \`SELECT AVG(total_spent) FROM customers\`
-2. Returns a single value (e.g., 450)
-3. Outer query uses that value: \`WHERE total_spent > 450\`
+This counts each user only once, no matter how many events they have.
 
-**Common subquery patterns:**
-
-Compare to average:
-\`\`\`sql
-WHERE salary > (SELECT AVG(salary) FROM employees)
-\`\`\`
-
-Find records matching another table:
-\`\`\`sql
-WHERE customer_id IN (SELECT id FROM customers WHERE country = 'US')
-\`\`\`
-
-**Pro tip:** Subqueries can be slow on large tables. For better performance, use JOINs when possible.`,
-    exercise: `Find orders where the total is greater than the average order total. Show order_id and total.`,
-    hint: 'SELECT order_id, total FROM orders WHERE total > (SELECT AVG(total) FROM orders)',
-    solution: 'SELECT order_id, total FROM orders WHERE total > (SELECT AVG(total) FROM orders);',
-    validation: {
-      mustContain: ['SELECT', 'WHERE', '>', '(', 'SELECT', 'AVG', ')'],
-      minRows: 1
-    },
-    proTip: '"Better than average" or "top performers compared to typical" = subquery with AVG()',
-    commonErrors: [
-      { error: 'Subquery returns multiple rows', fix: 'Use IN instead of = if subquery returns multiple values' },
-      { error: 'Too many parentheses', fix: 'Wrap subquery in one set of parens: WHERE x > (SELECT ...)' }
-    ]
-  },
-
-  {
-    id: 'm4-l2',
-    module: 4,
-    moduleTitle: 'Advanced Patterns',
-    lesson: 2,
-    title: 'CASE Expressions',
-    subtitle: 'Categorizing data',
-    scenario: `Marketing wants to segment customers: "High Value" (>$1000), "Medium" ($100-1000), "Low" (<$100).
-
-SQL can categorize data with CASE.`,
-    concept: `# CASE: Conditional Logic in SQL
-
-CASE is like IF/ELSE for SQL:
+**Combine with date grouping:**
 
 \`\`\`sql
 SELECT
-    name,
-    total_spent,
-    CASE
-        WHEN total_spent >= 1000 THEN 'High Value'
-        WHEN total_spent >= 100 THEN 'Medium'
-        ELSE 'Low'
-    END as segment
-FROM customers;
-\`\`\`
-
-**How it works:**
-1. Evaluates each WHEN condition in order
-2. Returns the THEN value for first true condition
-3. If none match, returns ELSE (or NULL if no ELSE)
-
-**Common uses:**
-- Categorizing values into buckets
-- Converting codes to labels: WHEN status = 1 THEN 'Active'
-- Calculating different values: WHEN country = 'US' THEN price * 1.0 ELSE price * 1.2
-
-**Pro tip:** You can use CASE in any clause:
-\`\`\`sql
-SELECT COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_count
-FROM orders;
-\`\`\``,
-    exercise: `Categorize orders as: 'High' if total > 100, 'Medium' if total between 50-100, 'Low' if total < 50. Show order_id, total, and the category.`,
-    hint: 'SELECT order_id, total, CASE WHEN total > 100 THEN \'High\' WHEN total >= 50 THEN \'Medium\' ELSE \'Low\' END as category FROM orders',
-    solution: "SELECT order_id, total, CASE WHEN total > 100 THEN 'High' WHEN total >= 50 THEN 'Medium' ELSE 'Low' END as category FROM orders;",
-    validation: {
-      mustContain: ['SELECT', 'CASE', 'WHEN', 'THEN', 'END'],
-      minRows: 1
-    },
-    proTip: '"Bucket these values" or "segment customers" or "categorize by X" = CASE expression',
-    commonErrors: [
-      { error: 'Forgot END', fix: 'CASE WHEN x THEN y END (always need END)' },
-      { error: 'Order matters', fix: 'Put most specific conditions first. WHEN x > 100 THEN... must come before WHEN x > 50' }
-    ]
-  },
-
-  {
-    id: 'm4-l3',
-    module: 4,
-    moduleTitle: 'Advanced Patterns',
-    lesson: 3,
-    title: 'Common Table Expressions',
-    subtitle: 'Breaking complex queries into steps',
-    scenario: `You need a complex report: monthly revenue, compared to previous month, with growth percentage.
-
-One giant query is hard to read and debug. CTEs let you build it step by step.`,
-    concept: `# CTE: Common Table Expression
-
-A CTE (WITH clause) defines a temporary result you can reference:
-
-\`\`\`sql
-WITH monthly_sales AS (
-    SELECT
-        strftime('%Y-%m', order_date) as month,
-        SUM(total) as revenue
-    FROM orders
-    GROUP BY month
-)
-SELECT * FROM monthly_sales ORDER BY month;
-\`\`\`
-
-**Why use CTEs:**
-1. **Readability** - break complex queries into steps
-2. **Debugging** - test each part separately
-3. **Reusability** - reference the same CTE multiple times
-
-**Multiple CTEs:**
-\`\`\`sql
-WITH
-    high_value AS (
-        SELECT * FROM customers WHERE total_spent > 1000
-    ),
-    recent_orders AS (
-        SELECT * FROM orders WHERE order_date > '2024-01-01'
-    )
-SELECT h.name, COUNT(r.id) as recent_orders
-FROM high_value h
-JOIN recent_orders r ON h.id = r.customer_id
-GROUP BY h.id;
-\`\`\`
-
-**Pro tip:** CTEs make complex queries readable. Your future self (and teammates) will thank you.`,
-    exercise: `Use a CTE to find customers with more than 5 orders, then join to get their names. Show customer name and order count.`,
-    hint: 'WITH frequent_buyers AS (SELECT customer_id, COUNT(*) as cnt FROM orders GROUP BY customer_id HAVING COUNT(*) > 5) SELECT c.name, f.cnt FROM frequent_buyers f JOIN customers c ON f.customer_id = c.id',
-    solution: 'WITH frequent_buyers AS (SELECT customer_id, COUNT(*) as cnt FROM orders GROUP BY customer_id HAVING COUNT(*) > 5) SELECT c.name, f.cnt FROM frequent_buyers f JOIN customers c ON f.customer_id = c.id;',
-    validation: {
-      mustContain: ['WITH', 'AS', 'SELECT', 'JOIN'],
-      minRows: 1
-    },
-    proTip: '"This query is too complex" = time for a CTE. Each step gets its own SELECT.',
-    commonErrors: [
-      { error: 'Forgot comma between CTEs', fix: 'WITH a AS (...), b AS (...) - comma between multiple CTEs' },
-      { error: 'Reference before definition', fix: 'CTEs must be defined before used. Define in order of dependency.' }
-    ]
-  }
-];
-
-// Quiz questions for end of each module
-const quizzes = {
-  1: {
-    module: 1,
-    title: 'Getting Data Out - Quiz',
-    questions: [
-      {
-        question: 'Which query gets all columns from the products table?',
-        options: ['SELECT ALL FROM products', 'SELECT * FROM products', 'GET * FROM products', 'SELECT products.*'],
-        correct: 1,
-        explanation: 'SELECT * retrieves all columns. It\'s the standard SQL way.'
-      },
-      {
-        question: 'What\'s wrong with: SELECT name FROM users WHERE city = Paris?',
-        options: ['Nothing, it\'s correct', 'Paris needs quotes', 'Should use == not =', 'WHERE must come before SELECT'],
-        correct: 1,
-        explanation: 'Text values need quotes: WHERE city = \'Paris\''
-      },
-      {
-        question: 'How do you get the 10 most recent orders?',
-        options: ['SELECT * FROM orders LIMIT 10', 'SELECT * FROM orders ORDER BY created_at DESC LIMIT 10', 'SELECT TOP 10 * FROM orders', 'SELECT * FROM orders ORDER BY created_at LIMIT 10'],
-        correct: 1,
-        explanation: 'ORDER BY created_at DESC sorts newest first, LIMIT 10 takes the top 10.'
-      }
-    ]
-  },
-  2: {
-    module: 2,
-    title: 'Combining Data - Quiz',
-    questions: [
-      {
-        question: 'When would you use LEFT JOIN instead of JOIN?',
-        options: ['When tables have the same columns', 'When you want all rows from the first table, even without matches', 'When joining more than 2 tables', 'LEFT JOIN is always better'],
-        correct: 1,
-        explanation: 'LEFT JOIN keeps all rows from the left table. Use it when you don\'t want to lose records that have no match.'
-      },
-      {
-        question: 'What connects two tables in a JOIN?',
-        options: ['The LINK clause', 'The ON clause with matching columns', 'They must have the same name', 'The CONNECT keyword'],
-        correct: 1,
-        explanation: 'ON specifies how tables relate: ON orders.customer_id = customers.id'
-      }
-    ]
-  },
-  3: {
-    module: 3,
-    title: 'Aggregating Data - Quiz',
-    questions: [
-      {
-        question: 'What\'s the difference between WHERE and HAVING?',
-        options: ['They\'re the same', 'WHERE filters rows, HAVING filters groups', 'HAVING is faster', 'WHERE is deprecated'],
-        correct: 1,
-        explanation: 'WHERE filters individual rows before grouping. HAVING filters after GROUP BY aggregates results.'
-      },
-      {
-        question: 'Which query correctly shows revenue by category?',
-        options: ['SELECT category, SUM(total) FROM orders', 'SELECT category, SUM(total) FROM orders GROUP BY category', 'SELECT SUM(total), category FROM orders', 'SELECT category, total FROM orders GROUP BY category'],
-        correct: 1,
-        explanation: 'When using aggregates like SUM(), non-aggregated columns must be in GROUP BY.'
-      }
-    ]
-  },
-  4: {
-    module: 4,
-    title: 'Advanced Patterns - Quiz',
-    questions: [
-      {
-        question: 'What does a CASE expression do?',
-        options: ['Switches between databases', 'Adds conditional logic to queries', 'Creates new tables', 'Handles errors'],
-        correct: 1,
-        explanation: 'CASE lets you categorize data or apply conditional logic, like IF/ELSE in other languages.'
-      },
-      {
-        question: 'Why use a CTE (WITH clause)?',
-        options: ['It\'s faster than subqueries', 'It makes complex queries more readable', 'It\'s required by SQL standard', 'It creates permanent tables'],
-        correct: 1,
-        explanation: 'CTEs break complex queries into readable steps. Great for debugging and sharing with teammates.'
-      }
-    ]
-  }
-};
-
-// Real-world query templates users can copy
-const queryTemplates = [
-  {
-    name: 'Daily Active Users',
-    description: 'Count unique users who performed an action today',
-    query: `SELECT COUNT(DISTINCT user_id) as daily_active_users
+ DATE(created_at) as date,
+ COUNT(DISTINCT user_id) as unique_users
 FROM events
-WHERE date(created_at) = date('now');`
-  },
-  {
-    name: 'Revenue by Month',
-    description: 'Monthly revenue trend for dashboards',
-    query: `SELECT
-    strftime('%Y-%m', order_date) as month,
-    SUM(total) as revenue,
-    COUNT(*) as orders
+GROUP BY DATE(created_at)
+ORDER BY date;
+\`\`\`
+
+The DATE() function extracts just the date from a timestamp, grouping all events from the same day.`,
+ exercise: `Count unique users per day from the events table. Show date and user count.`,
+ hint: 'Use DATE(created_at) and COUNT(DISTINCT user_id) with GROUP BY.',
+ solution: 'SELECT DATE(created_at) as date, COUNT(DISTINCT user_id) as unique_users FROM events GROUP BY DATE(created_at) ORDER BY date;',
+ validation: {
+ mustContain: ['SELECT', 'COUNT', 'DISTINCT', 'FROM', 'events', 'GROUP BY'],
+ minRows: 1
+ },
+ proTip: 'DAU (Daily Active Users), WAU (Weekly), MAU (Monthly) are core product metrics.',
+ commonErrors: [
+ { error: 'Forgot DISTINCT', fix: 'COUNT(user_id) counts all events, not unique users' },
+ { error: 'No date grouping', fix: 'GROUP BY DATE(created_at) to get daily breakdown' }
+ ]
+ },
+
+ {
+ id: 'm4-l2',
+ module: 4,
+ moduleTitle: 'Real-World Analytics',
+ lesson: 2,
+ title: 'Retention Basics',
+ subtitle: 'Do users come back?',
+ scenario: `You launched a new feature. Are users returning?
+
+Retention measures what percentage of users return after their first visit.`,
+ concept: `# Calculating Retention
+
+Retention = Users who returned / Users who started
+
+\`\`\`sql
+-- Day 1 retention: returned the next day
+WITH first_day AS (
+ SELECT user_id, DATE(MIN(created_at)) as first_date
+ FROM events
+ GROUP BY user_id
+),
+returned AS (
+ SELECT DISTINCT user_id, DATE(created_at) as visit_date
+ FROM events
+)
+SELECT
+ f.first_date,
+ COUNT(DISTINCT f.user_id) as new_users,
+ COUNT(DISTINCT CASE WHEN r.visit_date = f.first_date + 1 THEN f.user_id END) as returned_next_day
+FROM first_day f
+LEFT JOIN returned r ON f.user_id = r.user_id
+GROUP BY f.first_date;
+\`\`\`
+
+**Simpler approach for learning:**
+\`\`\`sql
+-- Just see if users have multiple events
+SELECT user_id, COUNT(DISTINCT DATE(created_at)) as active_days
+FROM events
+GROUP BY user_id
+HAVING COUNT(DISTINCT DATE(created_at)) > 1;
+\`\`\`
+
+This shows users who were active on multiple days.`,
+ exercise: `Find users who were active on more than one day. Show user_id and their active day count.`,
+ hint: 'Group by user_id, count distinct dates, filter with HAVING > 1.',
+ solution: 'SELECT user_id, COUNT(DISTINCT DATE(created_at)) as active_days FROM events GROUP BY user_id HAVING COUNT(DISTINCT DATE(created_at)) > 1;',
+ validation: {
+ mustContain: ['SELECT', 'user_id', 'COUNT', 'DISTINCT', 'DATE', 'GROUP BY', 'HAVING'],
+ minRows: 1
+ },
+ proTip: 'Retention is the #1 metric for subscription products. High retention = product-market fit.',
+ commonErrors: [
+ { error: 'Counted events not days', fix: 'COUNT(*) counts events, use COUNT(DISTINCT DATE(created_at))' },
+ { error: 'Wrong HAVING', fix: 'HAVING COUNT > 1 not WHERE COUNT > 1' }
+ ]
+ },
+
+ {
+ id: 'm4-l3',
+ module: 4,
+ moduleTitle: 'Real-World Analytics',
+ lesson: 3,
+ title: 'Revenue Metrics',
+ subtitle: 'Average Order Value and more',
+ scenario: `E-commerce teams track Average Order Value (AOV) religiously.
+
+Higher AOV = more revenue without more customers.
+
+Let's calculate it by country to find our best markets.`,
+ concept: `# Business Metrics in SQL
+
+**Average Order Value (AOV):**
+\`\`\`sql
+SELECT AVG(total) as aov FROM orders;
+\`\`\`
+
+**AOV by segment:**
+\`\`\`sql
+SELECT shipping_country, AVG(total) as aov, COUNT(*) as orders
 FROM orders
-WHERE status = 'completed'
-GROUP BY month
-ORDER BY month;`
-  },
-  {
-    name: 'Customer Cohort Analysis',
-    description: 'First purchase month for each customer',
-    query: `SELECT
-    strftime('%Y-%m', first_order) as cohort,
-    COUNT(*) as customers
-FROM (
-    SELECT customer_id, MIN(order_date) as first_order
-    FROM orders
-    GROUP BY customer_id
-)
-GROUP BY cohort
-ORDER BY cohort;`
-  },
-  {
-    name: 'Top Products by Revenue',
-    description: 'Best-selling products for inventory decisions',
-    query: `SELECT
-    p.name,
-    COUNT(*) as units_sold,
-    SUM(oi.quantity * oi.price) as revenue
-FROM order_items oi
-JOIN products p ON oi.product_id = p.id
-GROUP BY p.id
-ORDER BY revenue DESC
-LIMIT 10;`
-  },
-  {
-    name: 'Churned Customers',
-    description: 'Customers who haven\'t ordered in 90 days',
-    query: `SELECT c.email, c.name, MAX(o.order_date) as last_order
+GROUP BY shipping_country
+ORDER BY aov DESC;
+\`\`\`
+
+**Total Customer Value (TCV) - how much each customer has spent:**
+\`\`\`sql
+SELECT c.name, SUM(o.total) as total_spent
 FROM customers c
-LEFT JOIN orders o ON c.id = o.customer_id
-GROUP BY c.id
-HAVING MAX(o.order_date) < date('now', '-90 days')
-   OR MAX(o.order_date) IS NULL;`
-  },
-  {
-    name: 'Average Order Value by Segment',
-    description: 'Compare spending across customer segments',
-    query: `SELECT
-    CASE
-        WHEN total_orders >= 10 THEN 'VIP'
-        WHEN total_orders >= 3 THEN 'Regular'
-        ELSE 'New'
-    END as segment,
-    AVG(avg_order_value) as aov,
-    COUNT(*) as customers
-FROM (
-    SELECT
-        customer_id,
-        COUNT(*) as total_orders,
-        AVG(total) as avg_order_value
-    FROM orders
-    GROUP BY customer_id
-)
-GROUP BY segment;`
-  }
+JOIN orders o ON c.id = o.customer_id
+GROUP BY c.id, c.name
+ORDER BY total_spent DESC;
+\`\`\`
+
+These metrics drive business decisions.`,
+ exercise: `Calculate AOV by shipping_country. Show country, average order value, and order count. Sort by AOV descending.`,
+ hint: 'Use AVG(total), COUNT(*), GROUP BY shipping_country, ORDER BY.',
+ solution: 'SELECT shipping_country, AVG(total) as aov, COUNT(*) as orders FROM orders GROUP BY shipping_country ORDER BY aov DESC;',
+ validation: {
+ mustContain: ['SELECT', 'shipping_country', 'AVG', 'COUNT', 'GROUP BY', 'ORDER BY'],
+ minRows: 1
+ },
+ proTip: 'Combine metrics: Revenue = Users × Conversion Rate × AOV. SQL can calculate each.',
+ commonErrors: [
+ { error: 'Used SUM instead of AVG', fix: 'AVG(total) for average, SUM(total) for total' },
+ { error: 'Forgot ORDER BY', fix: 'Add ORDER BY aov DESC to see highest AOV first' }
+ ]
+ }
 ];
 
-export { lessons, quizzes, queryTemplates };
+// Query templates - copy-paste ready queries for common tasks
+export const queryTemplates = [
+ {
+ name: 'List All Tables',
+ description: 'See what tables exist in the database',
+ query: "SELECT name FROM sqlite_master WHERE type='table';"
+ },
+ {
+ name: 'Describe a Table',
+ description: 'See columns in a specific table',
+ query: 'PRAGMA table_info(customers);'
+ },
+ {
+ name: 'Count Records',
+ description: 'How many rows in a table',
+ query: 'SELECT COUNT(*) as count FROM customers;'
+ },
+ {
+ name: 'Top 10 by Value',
+ description: 'Get highest values from any column',
+ query: 'SELECT * FROM customers ORDER BY total_spent DESC LIMIT 10;'
+ },
+ {
+ name: 'Filter by Date Range',
+ description: 'Records between two dates',
+ query: "SELECT * FROM orders WHERE order_date BETWEEN '2024-01-01' AND '2024-01-31';"
+ },
+ {
+ name: 'Group and Count',
+ description: 'Count records per category',
+ query: 'SELECT status, COUNT(*) as count FROM orders GROUP BY status;'
+ },
+ {
+ name: 'Join Tables',
+ description: 'Combine data from two tables',
+ query: 'SELECT c.name, o.total FROM customers c JOIN orders o ON c.id = o.customer_id;'
+ },
+ {
+ name: 'Find Duplicates',
+ description: 'Find records with same values',
+ query: 'SELECT email, COUNT(*) as count FROM customers GROUP BY email HAVING count > 1;'
+ }
+];
+
 export default lessons;
