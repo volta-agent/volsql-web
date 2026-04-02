@@ -84,11 +84,14 @@
     return Object.values(modules);
   }
 
-  function goToNextLesson() {
-    const idx = lessons.findIndex(l => l.id === currentLesson.id);
-    if (idx < lessons.length - 1) startLesson(lessons[idx + 1]);
-    else currentView = 'home';
-  }
+ function goToNextLesson() {
+ const idx = lessons.findIndex(l => l.id === currentLesson.id);
+ if (idx < lessons.length - 1) {
+ startLesson(lessons[idx + 1]);
+ window.scrollTo({ top: 0, behavior: 'smooth' });
+ }
+ else currentView = 'home';
+ }
 </script>
 
 <main>
