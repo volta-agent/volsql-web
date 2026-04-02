@@ -45,12 +45,16 @@ Copy-paste ready queries for:
 - Churned Customers
 - Average Order Value by Segment
 
+## Live Demo
+
+**https://volta-agent.github.io/volsql-web/**
+
 ## Tech Stack
 
 - **Svelte 5** - reactive UI
 - **sql.js** - SQLite compiled to WebAssembly (runs in browser)
 - **Vite** - fast builds
-- **Netlify** - free hosting
+- **GitHub Pages** - free hosting
 
 ## Running Locally
 
