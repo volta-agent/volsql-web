@@ -161,24 +161,7 @@
       {/each}
     </section>
 
-    <section class="schema-section">
-      <h3>Your Practice Database</h3>
-      <p>Learn with realistic business data:</p>
-      <div class="schema-grid">
-        {#if schema}
-          {#each schema as table}
-            <div class="schema-table">
-              <strong>{table.name}</strong>
-              <ul>
-                {#each table.columns as col}
-                  <li>{col}</li>
-                {/each}
-              </ul>
-            </div>
-          {/each}
-        {/if}
-      </div>
-    </section>
+
   {:else if currentView === 'lesson' && currentLesson}
     <div class="lesson-view">
       <button class="back-btn" onclick={() => currentView = 'home'}>
