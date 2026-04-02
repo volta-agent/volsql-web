@@ -186,8 +186,9 @@ export async function initSql() {
   if (db) return;
   
   try {
+    // Use local WASM file for better browser compatibility
     SQL = await initSqlJs({
-      locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+      locateFile: file => `/${file}`
     });
     
     db = new SQL.Database();
