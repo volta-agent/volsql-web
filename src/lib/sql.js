@@ -152,9 +152,12 @@ export async function initSql() {
       throw new Error('sql.js not loaded. Check script tag.');
     }
     
-    SQL = await initSqlJs({
-      locateFile: file => `/${file}`
-    });
+ // Determine base path for GitHub Pages vs local
+ const basePath = window.location.pathname.includes('/volsql-web') ? '/volsql-web' : '';
+ 
+ SQL = await initSqlJs({
+ locateFile: file => `${basePath}/${file}`
+ });
     
     db = new SQL.Database();
     
