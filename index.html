@@ -1,32 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/volsql-web/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Learn SQL through real work scenarios. Interactive lessons that teach you what you actually need at your job." />
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="VolSQL - Learn SQL for Your Actual Job" />
-    <meta property="og:description" content="14 interactive lessons. Real work scenarios. Run SQL in your browser. 100% free." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://volsql.netlify.app" />
-    <meta property="og:image" content="https://volsql.netlify.app/og-image.svg" />
-    
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="VolSQL - Learn SQL for Your Actual Job" />
-    <meta name="twitter:description" content="14 interactive lessons. Real work scenarios. Run SQL in your browser. 100% free." />
-    <meta name="twitter:image" content="https://volsql.netlify.app/og-image.svg" />
-    
-    <title>VolSQL - Learn SQL for Work</title>
-    
-    <!-- sql.js for in-browser SQLite -->
-    <script src="/volsql-web/sql-wasm-browser.js"></script>
-    <script type="module" crossorigin src="/volsql-web/assets/index-wh4IqYgD.js"></script>
-    <link rel="stylesheet" crossorigin href="/volsql-web/assets/index-CQnk1mjM.css">
-  </head>
-  <body>
-    <div id="app"></div>
-  </body>
+ <head>
+ <meta charset="UTF-8" />
+ <link rel="icon" type="image/svg+xml" href="/volsql-web/favicon.svg" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <meta name="description" content="Free SQL tutor with real work scenarios. 14 interactive lessons. Run SQL in your browser. Learn what you actually need at your job." />
+ <meta name="keywords" content="SQL, learn SQL, SQL tutorial, database, SQL for beginners, SQL practice, interactive SQL" />
+ <meta name="author" content="Volta Agent" />
+ <link rel="canonical" href="https://volsql.netlify.app/" />
+ 
+ <!-- Open Graph -->
+ <meta property="og:title" content="VolSQL - Learn SQL for Your Actual Job" />
+ <meta property="og:description" content="14 interactive lessons. Real work scenarios. Run SQL in your browser. 100% free." />
+ <meta property="og:type" content="website" />
+ <meta property="og:url" content="https://volsql.netlify.app/" />
+ <meta property="og:image" content="https://volsql.netlify.app/og-image.svg" />
+ <meta property="og:locale" content="en_US" />
+ <meta property="og:site_name" content="VolSQL" />
+ 
+ <!-- Twitter -->
+ <meta name="twitter:card" content="summary_large_image" />
+ <meta name="twitter:title" content="VolSQL - Learn SQL for Your Actual Job" />
+ <meta name="twitter:description" content="14 interactive lessons. Real work scenarios. Run SQL in your browser. 100% free." />
+ <meta name="twitter:image" content="https://volsql.netlify.app/og-image.svg" />
+ 
+ <!-- Structured Data -->
+ <script type="application/ld+json">
+ {
+ "@context": "https://schema.org",
+ "@type": "EducationalApplication",
+ "name": "VolSQL",
+ "description": "Free interactive SQL tutor with real work scenarios. 14 lessons covering SELECT, JOINs, aggregations, and more.",
+ "applicationCategory": "EducationalApplication",
+ "operatingSystem": "Web Browser",
+ "offers": {
+ "@type": "Offer",
+ "price": "0",
+ "priceCurrency": "USD"
+ },
+ "author": {
+ "@type": "Organization",
+ "name": "Volta Agent"
+ }
+ }
+ </script>
+ 
+ <title>VolSQL - Learn SQL for Work</title>
+ 
+ <!-- sql.js for in-browser SQLite -->
+ <script src="/volsql-web/sql-wasm-browser.js"></script>
+ <script type="module" crossorigin src="/volsql-web/assets/index-wh4IqYgD.js"></script>
+ <link rel="stylesheet" crossorigin href="/volsql-web/assets/index-CQnk1mjM.css">
+ </head>
+ <body>
+ <div id="app"></div>
+ </body>
 </html>
